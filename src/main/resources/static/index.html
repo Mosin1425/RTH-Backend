@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rajasthan Tent House Admin Control</title>
+    <link rel="stylesheet" href="/styles/style.css">
+</head>
+<body>
+
+    <div class="container">
+        <header>
+            <img src="/images/logo.png" alt="RTH Logo" class="logo" />
+            <h1>RAJASTHAN TENT HOUSE ADMIN CONTROL</h1>
+        </header>
+
+        <form id="uploadForm" enctype="multipart/form-data">
+            <input type="file" id="fileInput" name="image" required />
+            <button type="submit">Upload Image</button>
+        </form>
+
+        <form id="updateForm" enctype="multipart/form-data">
+            <input type="number" id="updateId" name="id" placeholder="Image ID" required />
+            <input type="file" id="updateFileInput" name="image" required />
+            <button type="submit">Update Image</button>
+        </form>
+
+        <button onclick="getAllImages()">Get All Images</button>
+        <div class="image-list" id="imageList"></div>
+    </div>
+
+    <script>
+        const uploadForm = document.getElementById('uploadForm');
+        const updateForm = document.getElementById('updateForm');
+        const fileInput = document.getElementById('fileInput');
+        const updateFileInput = document.getElementById('updateFileInput');
+        const imageList = document.getElementById('imageList');
+
+        uploadForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            if (!confirm("Are you sure you want to upload this image?")) {
+                return;
+            }
+            const file = fileInput.files[0];
+            const formData = new FormData();
+            formData.append('image', file);
+
+            try {
+                const response = await fetch('/api/v1/upload-image', {
+                    method: 'POST',
+                    body: formData,
+                });
+                const data = await response.json();
+                alert(data.message || 'Image uploaded successfully!');
+                getAllImages(); // Refresh image list after upload
+            } catch (error) {
+                alert('Error uploading image');
+            }
+        });
+
+        updateForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            if (!confirm("Are you sure you want to update this image?")) {
+                return;
+            }
+            const id = document.getElementById('updateId').value;
+            const file = updateFileInput.files[0];
+            const formData = new FormData();
+            formData.append('image', file);
+            formData.append('id', id);
+
+            try {
+                const response = await fetch(`/api/v1/update-image?id=${id}`, {
+                    method: 'PUT',
+                    body: formData,
+                });
+                const data = await response.json();
+                alert(data.message || 'Image updated successfully!');
+                getAllImages(); // Refresh image list after update
+            } catch (error) {
+                alert('Error updating image');
+            }
+        });
+
+        async function getAllImages() {
+            try {
+                const response = await fetch('/api/v1/getAll');
+                const images = await response.json();
+                imageList.innerHTML = '';
+                images.forEach(image => {
+                    const imgItem = document.createElement('div');
+                    imgItem.className = 'image-item';
+                    imgItem.innerHTML = `
+                        <img src="data:image/jpeg;base64,${image.imageData}" alt="${image.name}" />
+                        <div>
+                            <p>ID: ${image.id}</p>
+                            <p>Name: ${image.name}</p>
+                            <button class="delete-btn" onclick="deleteImage(${image.id})">Delete</button>
+                        </div>
+                    `;
+                    imageList.appendChild(imgItem);
+                });
+            } catch (error) {
+                alert('Error fetching images');
+            }
+        }
+
+        async function deleteImage(id) {
+            if (!confirm("Are you sure you want to delete this image?")) {
+                return;
+            }
+            try {
+                const response = await fetch(`/api/v1/delete-image?id=${id}`, {
+                    method: 'DELETE',
+                });
+                const data = await response.json();
+                alert(data.message || 'Image deleted successfully!');
+                getAllImages(); // Refresh image list after delete
+            } catch (error) {
+                alert('Error deleting image');
+            }
+        }
+    </script>
+
+</body>
+</html>
