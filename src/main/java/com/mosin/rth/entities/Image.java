@@ -24,7 +24,7 @@ public class Image {
 	@Column(name = "IMAGE_TYPE")
 	private String imageType;
 
-	@Column(name = "IMAGE_DATA")
+	@Column(name = "IMAGE_DATA", columnDefinition = "LONGBLOB")
 	@Lob
 	private byte[] imageData;
 
