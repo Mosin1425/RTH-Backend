@@ -2,6 +2,7 @@ package com.mosin.rth.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -14,6 +15,7 @@ import org.springframework.web.multipart.MultipartFile;
 import com.mosin.rth.dto.ResponseMessage;
 import com.mosin.rth.service.ImageService;
 
+@CrossOrigin(origins = "https://rajasthantenthouse.com/")
 @RestController
 @RequestMapping(value = "/api/v1")
 public class ImageController {

@@ -29,7 +29,23 @@
         <div class="image-list" id="imageList"></div>
     </div>
 
+    <!-- Loading Indicator -->
+    <div id="loading" style="display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);">
+        <div class="loader"></div>
+        <p>Loading...</p>
+    </div>
+
     <script>
+        // Function to show the loading indicator
+        function showLoading() {
+            document.getElementById('loading').style.display = 'block';
+        }
+
+        // Function to hide the loading indicator
+        function hideLoading() {
+            document.getElementById('loading').style.display = 'none';
+        }
+
         const uploadForm = document.getElementById('uploadForm');
         const updateForm = document.getElementById('updateForm');
         const fileInput = document.getElementById('fileInput');
@@ -45,6 +61,8 @@
             const formData = new FormData();
             formData.append('image', file);
 
+            showLoading(); // Show loading indicator
+
             try {
                 const response = await fetch('/api/v1/upload-image', {
                     method: 'POST',
@@ -55,6 +73,8 @@
                 getAllImages(); // Refresh image list after upload
             } catch (error) {
                 alert('Error uploading image');
+            } finally {
+                hideLoading(); // Hide loading indicator
             }
         });
 
@@ -69,6 +89,8 @@
             formData.append('image', file);
             formData.append('id', id);
 
+            showLoading(); // Show loading indicator
+
             try {
                 const response = await fetch(`/api/v1/update-image?id=${id}`, {
                     method: 'PUT',
@@ -79,10 +101,13 @@
                 getAllImages(); // Refresh image list after update
             } catch (error) {
                 alert('Error updating image');
+            } finally {
+                hideLoading(); // Hide loading indicator
             }
         });
 
         async function getAllImages() {
+            showLoading(); // Show loading indicator
             try {
                 const response = await fetch('/api/v1/getAll');
                 const images = await response.json();
@@ -102,6 +127,8 @@
                 });
             } catch (error) {
                 alert('Error fetching images');
+            } finally {
+                hideLoading(); // Hide loading indicator
             }
         }
 
@@ -109,6 +136,7 @@
             if (!confirm("Are you sure you want to delete this image?")) {
                 return;
             }
+            showLoading(); // Show loading indicator
             try {
                 const response = await fetch(`/api/v1/delete-image?id=${id}`, {
                     method: 'DELETE',
@@ -118,6 +146,8 @@
                 getAllImages(); // Refresh image list after delete
             } catch (error) {
                 alert('Error deleting image');
+            } finally {
+                hideLoading(); // Hide loading indicator
             }
         }
     </script>
