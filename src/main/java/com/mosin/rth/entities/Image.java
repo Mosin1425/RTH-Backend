@@ -23,16 +23,20 @@ public class Image {
 
 	@Column(name = "IMAGE_TYPE")
 	private String imageType;
+	
+	@Column(name = "USER_NAME")
+	private String userName;
 
 	@Column(name = "IMAGE_DATA", columnDefinition = "LONGBLOB")
 	@Lob
 	private byte[] imageData;
 
-	public Image(Long id, String name, String imageType, byte[] imageData) {
+	public Image(Long id, String name, String imageType, String userName, byte[] imageData) {
 		super();
 		this.id = id;
 		this.name = name;
 		this.imageType = imageType;
+		this.userName = userName;
 		this.imageData = imageData;
 	}
 
@@ -64,6 +68,14 @@ public class Image {
 		this.imageData = imageData;
 	}
 
+	public String getUserName() {
+		return userName;
+	}
+
+	public void setUserName(String userName) {
+		this.userName = userName;
+	}
+
 	public String getImageType() {
 		return imageType;
 	}
@@ -74,6 +86,7 @@ public class Image {
 
 	@Override
 	public String toString() {
-		return "Image [id=" + id + ", name=" + name + ", imageData=" + Arrays.toString(imageData) + "]";
+		return "Image [id=" + id + ", name=" + name + ", imageType=" + imageType + ", userName=" + userName
+				+ ", imageData=" + Arrays.toString(imageData) + "]";
 	}
 }

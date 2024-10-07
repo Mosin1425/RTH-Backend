@@ -38,13 +38,14 @@ public class ImageServiceImpl implements ImageService {
 	}
 
 	@Override
-	public ResponseEntity<Object> uploadImage(MultipartFile file) {
+	public ResponseEntity<Object> uploadImage(MultipartFile file, String userName) {
 		try {
 			Image image = new Image();
 
 			image.setName(file.getOriginalFilename());
 			image.setImageType(file.getContentType());
 			image.setImageData(file.getBytes());
+			image.setUserName(userName);
 
 			imageRepository.save(image);
 			logger.info("[ImageServiceImpl] [uploadImage] Image uploaded successfully... ");
@@ -75,10 +76,10 @@ public class ImageServiceImpl implements ImageService {
 	}
 
 	@Override
-	public ResponseEntity<Object> getAllImages() {
+	public ResponseEntity<Object> getAllImages(String userName) {
 		try {
 			logger.info("[ImageServiceImpl] [getAllImages] In get all images...");
-			return ResponseEntity.ok().body(imageRepository.findAll());
+			return ResponseEntity.ok().body(imageRepository.findByUserName(userName));
 
 		} catch (Exception e) {
 			logger.error("[ImageServiceImpl] [getAllImages] Error: " + e.getMessage());
@@ -89,11 +90,11 @@ public class ImageServiceImpl implements ImageService {
 	}
 
 	@Override
-	public ResponseEntity<Object> updateImage(Long id, MultipartFile file) {
+	public ResponseEntity<Object> updateImage(Long id, MultipartFile file, String userName) {
 		logger.info("[ImageServiceImpl] [updateImage] In get all images...");
 		Optional<Image> image = imageRepository.findById(id);
 		
-		if(!image.isPresent()) {
+		if(!image.isPresent() || !image.get().getUserName().equalsIgnoreCase(userName)) {
 			return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ResponseMessage("Image Not Found"));
 		}
 		
@@ -102,6 +103,7 @@ public class ImageServiceImpl implements ImageService {
 			newImage.setImageType(file.getContentType());
 			newImage.setName(file.getOriginalFilename());
 			newImage.setImageData(file.getBytes());
+			newImage.setUserName(userName);
 			
 			imageRepository.save(newImage);
 			
