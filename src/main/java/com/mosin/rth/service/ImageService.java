@@ -7,11 +7,11 @@ public interface ImageService {
 
 	ResponseEntity<Object> getImage(Long id);
 
-	ResponseEntity<Object> uploadImage(MultipartFile file);
+	ResponseEntity<Object> uploadImage(MultipartFile file, String userName);
 
 	ResponseEntity<Object> deleteImage(Long id);
 
-	ResponseEntity<Object> getAllImages();
+	ResponseEntity<Object> getAllImages(String userName);
 
-	ResponseEntity<Object> updateImage(Long id, MultipartFile file);
+	ResponseEntity<Object> updateImage(Long id, MultipartFile file, String userName);
 }

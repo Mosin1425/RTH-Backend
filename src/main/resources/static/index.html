@@ -14,19 +14,45 @@
             <h1>RAJASTHAN TENT HOUSE ADMIN CONTROL</h1>
         </header>
 
-        <form id="uploadForm" enctype="multipart/form-data">
-            <input type="file" id="fileInput" name="image" required />
-            <button type="submit">Upload Image</button>
-        </form>
+        <!-- User Display -->
+        <div id="username-display" style="display: none;">
+            <p>Logged in as: <span id="username-span"></span></p>
+        </div>
 
-        <form id="updateForm" enctype="multipart/form-data">
-            <input type="number" id="updateId" name="id" placeholder="Image ID" required />
-            <input type="file" id="updateFileInput" name="image" required />
-            <button type="submit">Update Image</button>
-        </form>
+        <!-- Login Form -->
+        <div id="login-section" style="display: none;">
+            <h2>Login</h2>
+            <form id="loginForm">
+                <input type="text" id="loginUsername" name="username" placeholder="Username" required />
+                <input type="password" id="password" name="password" placeholder="Password" required />
+                <button type="submit">Login</button>
+            </form>
+            <div id="error-message" style="color: red;"></div>
+        </div>
 
-        <button onclick="getAllImages()">Get All Images</button>
-        <div class="image-list" id="imageList"></div>
+        <!-- Admin Panel Section (Hidden until login) -->
+        <div id="admin-section" style="display: none;">
+            <p>Welcome to the admin panel!</p>
+            <!-- Upload Form -->
+            <form id="uploadForm" enctype="multipart/form-data">
+                <input type="file" id="fileInput" name="image" required />
+                <button type="submit">Upload Image</button>
+            </form>
+
+            <!-- Update Form -->
+            <form id="updateForm" enctype="multipart/form-data">
+                <input type="number" id="updateId" name="id" placeholder="Image ID" required />
+                <input type="file" id="updateFileInput" name="image" required />
+                <button type="submit">Update Image</button>
+            </form>
+
+            <!-- Button to Fetch Images -->
+            <button onclick="getAllImages()">Get All Images</button>
+            <div class="image-list" id="imageList"></div>
+
+            <!-- Logout Button -->
+            <button id="logoutButton" style="margin-top: 20px;">Logout</button>
+        </div>
     </div>
 
     <!-- Loading Indicator -->
@@ -46,20 +72,80 @@
             document.getElementById('loading').style.display = 'none';
         }
 
+        const loginForm = document.getElementById('loginForm');
         const uploadForm = document.getElementById('uploadForm');
         const updateForm = document.getElementById('updateForm');
         const fileInput = document.getElementById('fileInput');
         const updateFileInput = document.getElementById('updateFileInput');
         const imageList = document.getElementById('imageList');
+        const loginSection = document.getElementById('login-section');
+        const adminSection = document.getElementById('admin-section');
+        const logoutButton = document.getElementById('logoutButton');
+        const usernameSpan = document.getElementById('username-span');
+        const usernameDisplay = document.getElementById('username-display');
 
+        // Check if the user is logged in on page load
+        window.onload = async function() {
+            try {
+                const response = await fetch('/api/v1/current-user');
+                const data = await response.json();
+                if (response.ok) {
+                    usernameSpan.innerText = data.username; // Set the logged-in username
+                    usernameDisplay.style.display = 'block'; // Show the username display
+                    loginSection.style.display = 'none';
+                    adminSection.style.display = 'block';
+                    getAllImages(); // Load images on successful login
+                } else {
+                    loginSection.style.display = 'block';
+                    adminSection.style.display = 'none';
+                }
+            } catch (error) {
+                console.error('Error checking login status:', error);
+            }
+        };
+
+        // Login form submission
+        loginForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const username = document.getElementById('loginUsername').value; // Use the new ID
+            const password = document.getElementById('password').value;
+
+            const formData = new FormData();
+            formData.append('username', username);
+            formData.append('password', password);
+
+            showLoading(); // Show loading indicator
+
+            try {
+                const response = await fetch('/api/v1/login', {
+                    method: 'POST',
+                    body: formData,
+                });
+                const data = await response.json();
+                console.log("Login response:", response);
+                console.log("Response data:", data);
+                if (response.ok) {
+                    usernameSpan.innerText = username; // Set the logged-in username
+                    usernameDisplay.style.display = 'block'; // Show the username display
+                    loginSection.style.display = 'none';
+                    adminSection.style.display = 'block';
+                    getAllImages(); // Load images on successful login
+                } else {
+                    document.getElementById('error-message').innerText = data.message || 'Login failed!';
+                }
+            } catch (error) {
+                document.getElementById('error-message').innerText = 'Error during login';
+            } finally {
+                hideLoading(); // Hide loading indicator
+            }
+        });
+
+        // Upload form submission
         uploadForm.addEventListener('submit', async (e) => {
             e.preventDefault();
-            if (!confirm("Are you sure you want to upload this image?")) {
-                return;
-            }
-            const file = fileInput.files[0];
+
             const formData = new FormData();
-            formData.append('image', file);
+            formData.append('image', fileInput.files[0]);
 
             showLoading(); // Show loading indicator
 
@@ -69,8 +155,12 @@
                     body: formData,
                 });
                 const data = await response.json();
-                alert(data.message || 'Image uploaded successfully!');
-                getAllImages(); // Refresh image list after upload
+                if (response.ok) {
+                    alert(data.message || 'Image uploaded successfully!');
+                    getAllImages(); // Refresh image list
+                } else {
+                    alert('Error uploading image');
+                }
             } catch (error) {
                 alert('Error uploading image');
             } finally {
@@ -78,16 +168,13 @@
             }
         });
 
+        // Update form submission
         updateForm.addEventListener('submit', async (e) => {
             e.preventDefault();
-            if (!confirm("Are you sure you want to update this image?")) {
-                return;
-            }
+
             const id = document.getElementById('updateId').value;
-            const file = updateFileInput.files[0];
             const formData = new FormData();
-            formData.append('image', file);
-            formData.append('id', id);
+            formData.append('image', updateFileInput.files[0]);
 
             showLoading(); // Show loading indicator
 
@@ -97,8 +184,12 @@
                     body: formData,
                 });
                 const data = await response.json();
-                alert(data.message || 'Image updated successfully!');
-                getAllImages(); // Refresh image list after update
+                if (response.ok) {
+                    alert(data.message || 'Image updated successfully!');
+                    getAllImages(); // Refresh image list
+                } else {
+                    alert('Error updating image');
+                }
             } catch (error) {
                 alert('Error updating image');
             } finally {
@@ -106,6 +197,7 @@
             }
         });
 
+        // Fetch all images
         async function getAllImages() {
             showLoading(); // Show loading indicator
             try {
@@ -132,6 +224,7 @@
             }
         }
 
+        // Delete image
         async function deleteImage(id) {
             if (!confirm("Are you sure you want to delete this image?")) {
                 return;
@@ -142,15 +235,41 @@
                     method: 'DELETE',
                 });
                 const data = await response.json();
-                alert(data.message || 'Image deleted successfully!');
-                getAllImages(); // Refresh image list after delete
+                if (response.ok) {
+                    alert(data.message || 'Image deleted successfully!');
+                    getAllImages(); // Refresh image list after delete
+                } else {
+                    alert('Error deleting image');
+                }
             } catch (error) {
                 alert('Error deleting image');
             } finally {
                 hideLoading(); // Hide loading indicator
             }
         }
-    </script>
 
+        // Logout button functionality
+        logoutButton.addEventListener('click', async () => {
+            showLoading(); // Show loading indicator
+            try {
+                const response = await fetch('/api/v1/logout', {
+                    method: 'POST',
+                });
+
+                if (response.ok) {
+                    usernameDisplay.style.display = 'none'; // Hide username display
+                    loginSection.style.display = 'block'; // Show login section
+                    adminSection.style.display = 'none'; // Hide admin section
+                    alert('Logged out successfully!');
+                } else {
+                    alert('Error during logout');
+                }
+            } catch (error) {
+                alert('Error during logout');
+            } finally {
+                hideLoading(); // Hide loading indicator
+            }
+        });
+    </script>
 </body>
 </html>
