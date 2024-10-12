@@ -20,6 +20,7 @@ import com.mosin.rth.dto.ResponseMessage;
 import com.mosin.rth.entities.Image;
 import com.mosin.rth.service.ImageService;
 
+import io.micrometer.common.util.StringUtils;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
@@ -112,9 +113,12 @@ public class ImageController {
 
 	@GetMapping("/getAll")
 	public ResponseEntity<Object> getAll(HttpSession session) {
-		
+
 		String userName = (String) session.getAttribute("username");
-		return imageService.getAllImages(userName);
+		if (StringUtils.isNotEmpty(userName)) {
+			return imageService.getAllImages(userName);
+		}
+		return ResponseEntity.ok().body("No data found");
 	}
 	
 	@PutMapping("/update-image")
