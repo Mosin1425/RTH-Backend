@@ -5,6 +5,9 @@ import java.util.Optional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
@@ -112,6 +115,20 @@ public class ImageServiceImpl implements ImageService {
 		} catch (Exception e) {
 			logger.error("[ImageServiceImpl] [updateImage] Error: " + e.getMessage());
 			return ResponseEntity.ok().body(new ResponseMessage("Error while updating the image..."));
+		}
+	}
+
+	@Override
+	public ResponseEntity<Page<Image>> getAllData(int page, int size) {
+		try {
+			Pageable paging = PageRequest.of(page, size);
+			Page<Image> pagedResult = imageRepository.findByUserName(paging, "shahrukh");
+			logger.info("[ImageServiceImpl] [getAllData] Paginated Data");
+			return new ResponseEntity<>(pagedResult, HttpStatus.OK);
+		} catch (Exception e) {
+			logger.error("[ImageServiceImpl] [getAllData] ERROR");
+			e.printStackTrace();
+			return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
 		}
 	}
 }
