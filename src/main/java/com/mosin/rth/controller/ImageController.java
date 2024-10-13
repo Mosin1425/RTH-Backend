@@ -6,6 +6,7 @@ import java.util.Map;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -44,6 +45,15 @@ public class ImageController {
 	        return "tested successfully...";
 	    }
 
+	    @Scheduled(fixedRate = 15000)
+	    public void keepConnectionAlive() {
+	    	try {
+				imageService.keepConnectionAlive();
+			} catch (Exception e) {
+				e.printStackTrace();
+				System.out.println("ERROR");
+			}
+	    }
 	    @PostMapping("/login")
 	    public ResponseEntity<Map<String, String>> login(
 	            @RequestParam("username") String username,

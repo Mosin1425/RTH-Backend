@@ -19,4 +19,6 @@ public interface ImageService {
 	ResponseEntity<Object> updateImage(Long id, MultipartFile file, String userName);
 
 	ResponseEntity<Page<Image>> getAllData(int page, int size);
+
+	void keepConnectionAlive();
 }
