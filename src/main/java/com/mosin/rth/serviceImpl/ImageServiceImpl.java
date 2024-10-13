@@ -131,4 +131,11 @@ public class ImageServiceImpl implements ImageService {
 			return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
 		}
 	}
+
+	@Override
+	public void keepConnectionAlive() {
+		Object o = imageRepository.keepConnectionAlive();
+		logger.info("OOOOOOOOOOOOOOOOO: " + o);
+		return;
+	}
 }
